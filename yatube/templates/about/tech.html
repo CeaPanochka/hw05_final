@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Технологии{% endblock %}
+{% block content %}
+{% comment %} Колонки с отступом сверху и снизу {% endcomment %}
+<h1 class="text-center">Используемые технологии</h1>
+<div class="row p-3">
+  <div class="d-flex justify-content-center">
+    <ul class="list-group list-group-flush w-25 text-center">
+      <li class="list-group-item">
+        Python
+      </li>
+      <li class="list-group-item">
+        Django
+      </li>
+      <li class="list-group-item">
+        Bootstrap
+      </li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
