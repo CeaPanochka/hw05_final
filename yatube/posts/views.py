@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 
 from .forms import CommentForm, PostForm
-from .models import Comment, Follow, Group, Post, User
+from .models import Follow, Group, Post, User
 
 NUMBER_OF_RECORDS = 10
 
@@ -12,7 +12,7 @@ NUMBER_OF_RECORDS = 10
 # Главная страница
 @cache_page(60 * 20)
 def index(request):
-    posts = Post.objects.order_by('-pub_date')
+    posts = Post.objects.all()
     page_obj = paginator_func(request, posts)
     context = {
         'page_obj': page_obj,
@@ -51,10 +51,10 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    comments = Comment.objects.select_related(
-        'author',
+    post = get_object_or_404(
+        Post, id=post_id
     )
+    comments = post.comments.all()
     form = CommentForm(
         request.POST or None,
     )
@@ -129,14 +129,7 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    authors = Follow.objects.filter(
-        user=request.user,
-    ).select_related('author')
-    posts = []
-    for author in authors:
-        author = get_object_or_404(User, following=author)
-        for post in author.posts.all():
-            posts.append(post)
+    posts = Post.objects.filter(author__following__user=request.user)
     page_obj = paginator_func(request, posts)
     context = {
         'page_obj': page_obj,
@@ -152,13 +145,12 @@ def profile_follow(request, username):
     ).exists()
     if request.user.username == username or follow:
         return redirect('posts:profile', username=username)
-    else:
-        author = User.objects.get(username=username)
-        Follow.objects.create(
-            user=request.user,
-            author=author,
-        )
-        return redirect('posts:profile', username=username)
+    author = User.objects.get(username=username)
+    Follow.objects.create(
+        user=request.user,
+        author=author,
+    )
+    return redirect('posts:profile', username=username)
 
 
 @login_required

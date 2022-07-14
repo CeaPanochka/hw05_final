@@ -64,6 +64,9 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    class Meta:
+        verbose_name = 'Комментарий'
+
     post = models.ForeignKey(
         Post,
         blank=False,
@@ -88,6 +91,9 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
+    class Meta:
+        verbose_name = 'Подписка'
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

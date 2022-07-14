@@ -73,13 +73,10 @@ class PostFormTests(TestCase):
             reverse('posts:profile', kwargs={'username': PostFormTests.user})
         )
         self.assertEqual(Post.objects.count(), post_count + 1)
-        self.assertTrue(
-            Post.objects.filter(
-                author=expected_name,
-                text=expected_text,
-                image=expected_image,
-            ).exists()
-        )
+        last_obj = Post.objects.all().first()
+        self.assertEqual(last_obj.author, expected_name)
+        self.assertEqual(last_obj.text, expected_text)
+        self.assertEqual(last_obj.image, expected_image)
 
     def test_edit_post(self):
         '''Валидная форма изменяет запись в Post'''

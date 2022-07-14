@@ -9,6 +9,29 @@ FIRST_COUNT_PAGE_OBJ = 10
 SECOND_COUNT_PAGE_OBJ = 3
 
 
+def test_context(self, response):
+    self.assertEqual(
+        first=response.context.get('group').title,
+        second='Тестовая группа'
+    )
+    self.assertEqual(
+        first=response.context.get('group').slug,
+        second='test-slug'
+    )
+    self.assertEqual(
+        first=response.context.get('group').description,
+        second='Тестовое описание'
+    )
+    self.assertEqual(
+        first=response.context.get('page_obj')[0].author.username,
+        second='Loly'
+    )
+    self.assertEqual(
+        first=response.context.get('page_obj')[0].text,
+        second='Тестовый пост'
+    )
+
+
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -86,21 +109,7 @@ class PostPagesTests(TestCase):
                 'posts:group_list', kwargs={'slug': 'test-slug'}
             ))
         )
-        self.assertEqual(
-            response.context.get('group').title, 'Тестовая группа'
-        )
-        self.assertEqual(
-            response.context.get('group').slug, 'test-slug'
-        )
-        self.assertEqual(
-            response.context.get('group').description, 'Тестовое описание'
-        )
-        self.assertEqual(
-            response.context.get('page_obj')[0].author.username, 'Loly'
-        )
-        self.assertEqual(
-            response.context.get('page_obj')[0].text, 'Тестовый пост'
-        )
+        test_context(self, response=response)
         self.assertTrue(
             response.context.get('page_obj')[0].image
         )
@@ -174,9 +183,11 @@ class PostPagesTests(TestCase):
             author=PostPagesTests.user,
             text='Текст, кешируемого поста',
         )
-        response_content = (
-            self.authorized_client.get(reverse('posts:main')).content
+        response = (
+            self.authorized_client.get(reverse('posts:main'))
         )
+        self.assertEqual(new_post.text, response.context['page_obj'][0].text)
+        response_content = response.content
         new_post.delete()
         response_cached_content = (
             self.authorized_client.get(reverse('posts:main')).content

@@ -4,7 +4,7 @@
   <h1>Страница подписок</h1>
   {% load cache %}
   {% cache 20 index_page %}
-  {% include 'posts/includes/switcher.html' %}
+  {% include 'posts/includes/switcher.html' with follow=True %}
   {% for post in page_obj %}
     {% include 'includes/post_cart.html' %}
     <a href="{% url 'posts:post_detail' post.id %}">Подробная информация</a><br>

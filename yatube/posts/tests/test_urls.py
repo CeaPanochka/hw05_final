@@ -74,7 +74,9 @@ class PostURLTests(TestCase):
             reverse('posts:post_edit', kwargs={'post_id': post_id}),
             follow=True,
         )
-        self.assertRedirects(response, f'/posts/{post_id}/')
+        self.assertRedirects(response, reverse(
+            'posts:post_detail', kwargs={'post_id': post_id}
+        ))
 
     def test_post_create_url_redirect_anonymous_on_login(self):
         post_id = PostURLTests.post.id
