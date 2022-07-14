@@ -9,29 +9,6 @@ FIRST_COUNT_PAGE_OBJ = 10
 SECOND_COUNT_PAGE_OBJ = 3
 
 
-def test_context(self, response):
-    self.assertEqual(
-        first=response.context.get('group').title,
-        second='Тестовая группа'
-    )
-    self.assertEqual(
-        first=response.context.get('group').slug,
-        second='test-slug'
-    )
-    self.assertEqual(
-        first=response.context.get('group').description,
-        second='Тестовое описание'
-    )
-    self.assertEqual(
-        first=response.context.get('page_obj')[0].author.username,
-        second='Loly'
-    )
-    self.assertEqual(
-        first=response.context.get('page_obj')[0].text,
-        second='Тестовый пост'
-    )
-
-
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -66,6 +43,57 @@ class PostPagesTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(PostPagesTests.user)
         cache.clear()
+
+    def test_group_post_detail_context(self):
+        post_id = PostPagesTests.post.id
+        templates_pages_names = {
+            (
+                reverse('posts:group_list', kwargs={'slug': 'test-slug'})
+            ): ['group', 'page_obj'],
+            (
+                reverse('posts:post_detail', kwargs={'post_id': post_id})
+            ): 'post',
+        }
+        for reverse_name, obj in templates_pages_names.items():
+            with self.subTest(reverse_name=reverse_name):
+                response = self.authorized_client.get(reverse_name)
+                if len(obj) > 2:
+                    self.assertEqual(
+                        first=response.context.get(obj).author.username,
+                        second='Loly'
+                    )
+                    self.assertEqual(
+                        first=response.context.get(obj).text,
+                        second='Тестовый пост'
+                    )
+                    self.assertTrue(
+                        response.context.get(obj).image, 'posts/small.gif'
+                    )
+                else:
+                    self.assertEqual(
+                        first=response.context.get(obj[0]).title,
+                        second='Тестовая группа'
+                    )
+                    self.assertEqual(
+                        first=response.context.get(obj[0]).slug,
+                        second='test-slug'
+                    )
+                    self.assertEqual(
+                        first=response.context.get(obj[0]).description,
+                        second='Тестовое описание'
+                    )
+                    self.assertEqual(
+                        first=response.context.get(obj[1])[0].author.username,
+                        second='Loly'
+                    )
+                    self.assertEqual(
+                        first=response.context.get(obj[1])[0].text,
+                        second='Тестовый пост'
+                    )
+                    self.assertTrue(
+                        response.context.get(obj[1])[0].image,
+                        'posts/small.gif'
+                    )
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
@@ -102,18 +130,6 @@ class PostPagesTests(TestCase):
         self.assertEqual(post_text_0, 'Тестовый пост')
         self.assertTrue(post_image_0)
 
-    def test_group_list_page_show_correct_context(self):
-        """Шаблон group_list сформирован с правильным контекстом."""
-        response = (
-            self.authorized_client.get(reverse(
-                'posts:group_list', kwargs={'slug': 'test-slug'}
-            ))
-        )
-        test_context(self, response=response)
-        self.assertTrue(
-            response.context.get('page_obj')[0].image
-        )
-
     def test_profile_page_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
         response = (
@@ -128,24 +144,6 @@ class PostPagesTests(TestCase):
         self.assertEqual(post_author_0, 'Loly')
         self.assertEqual(post_text_0, 'Тестовый пост')
         self.assertTrue(post_image_0)
-
-    def test_post_detail_page_show_correct_context(self):
-        '''Шаблон post_detail сформирован с правильным котнекстом.'''
-        post_id = PostPagesTests.post.id
-        response = (
-            self.authorized_client.get(reverse(
-                'posts:post_detail', kwargs={'post_id': post_id}
-            ))
-        )
-        self.assertEqual(
-            response.context.get('post').author.username, 'Loly'
-        )
-        self.assertEqual(
-            response.context.get('post').text, 'Тестовый пост'
-        )
-        self.assertTrue(
-            response.context.get('post').image, 'posts/small.gif'
-        )
 
     def test_post_create_page_show_correct_context(self):
         """Шаблон home сформирован с правильным контекстом."""
