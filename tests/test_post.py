@@ -8,9 +8,9 @@ from django.core.files.base import File
 from django.core.paginator import Page
 from django.db.models.query import QuerySet
 from PIL import Image
+
 from posts.forms import PostForm
 from posts.models import Post
-
 from tests.utils import get_field_from_context
 
 
